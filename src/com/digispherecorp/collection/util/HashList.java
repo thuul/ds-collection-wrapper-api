@@ -5,12 +5,12 @@
  */
 package com.digispherecorp.collection.util;
 
+import com.digispherecorp.collection.util.exception.EmptyCollectionException;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -20,8 +20,14 @@ import java.util.Set;
  *
  * <p>
  *
- * custom collection's interface implementation analogous to HashSet but
- * directly extending the Collection interface.
+ * custom Java Collection's interface implementation analogous to HashSet but
+ * directly extending the Collection interface. The interface is designed to
+ * accept duplicates but not Null entries. This interface holds elements
+ * internally in Nodes which are held together by connecting Head and Tail
+ * Nodes.
+ *
+ *
+ * <p>
  * @see Collection
  * @see AbstractCollection
  * @see Set
@@ -63,6 +69,20 @@ public class HashList<E> implements SortedCollection<E> {
     }
 
     @Override
+    public void sort() {
+        Object[] a = this.toArray();
+        Arrays.sort(a);
+        rearrangeNode(a);
+    }
+
+    @Override
+    public void sort(Comparator<? super E> c) {
+        Object[] a = this.toArray();
+        Arrays.sort(a, (Comparator) c);
+        rearrangeNode(a);
+    }
+
+    @Override
     public int size() {
         return size;
     }
@@ -75,7 +95,7 @@ public class HashList<E> implements SortedCollection<E> {
     @Override
     public boolean contains(Object o) {
         if (size == 0) {
-            throw new NoSuchElementException();
+            throw new EmptyCollectionException();
         }
         Object[] a = toArray();
         Arrays.sort(a);
@@ -87,9 +107,13 @@ public class HashList<E> implements SortedCollection<E> {
     public Iterator<E> iterator() {
         return new Iterator<E>() {
 
-            private ListNode<E> innerNode = head;
+            private ListNode<E> innerNode;
             private ListNode<E> remNode;
             private E element;
+
+            {
+                innerNode = head;
+            }
 
             @Override
             public boolean hasNext() {
@@ -124,6 +148,7 @@ public class HashList<E> implements SortedCollection<E> {
                     remNode = null;
                 } else {
                     prevNode.next = nextNode;
+                    nextNode.precedeNode = prevNode;
                     remNode = null;
                 }
                 size--;
@@ -134,7 +159,7 @@ public class HashList<E> implements SortedCollection<E> {
     @Override
     public Object[] toArray() {
         if (size == 0) {
-            throw new NoSuchElementException();
+            throw new EmptyCollectionException();
         }
         int arraySize = 0;
         Object[] toArray = new Object[size];
@@ -150,7 +175,7 @@ public class HashList<E> implements SortedCollection<E> {
     @Override
     public <T> T[] toArray(T[] a) {
         if (size == 0) {
-            throw new NoSuchElementException();
+            throw new EmptyCollectionException();
         }
         int arraySize = 0;
         T[] toArray = a;
@@ -190,10 +215,10 @@ public class HashList<E> implements SortedCollection<E> {
 
     @Override
     public boolean remove(Object o) {
-        boolean remove = false;
         if (size == 0) {
-            throw new NoSuchElementException();
+            throw new EmptyCollectionException();
         }
+        boolean remove = false;
         Iterator<E> iterator = iterator();
         while (iterator.hasNext()) {
             if (iterator.next().equals(o)) {
@@ -206,10 +231,18 @@ public class HashList<E> implements SortedCollection<E> {
         return remove;
     }
 
+    /**
+     *
+     * @param c
+     * @return boolean
+     *
+     * <p>
+     * DO NOT MODIFY
+     */
     @Override
     public boolean containsAll(Collection<?> c) {
         if (size == 0) {
-            throw new NoSuchElementException();
+            throw new EmptyCollectionException();
         }
         int i = 0;
         Object[] toArray = toArray();
@@ -248,7 +281,7 @@ public class HashList<E> implements SortedCollection<E> {
     @Override
     public boolean removeAll(Collection<?> c) {
         if (size == 0) {
-            throw new NoSuchElementException();
+            throw new EmptyCollectionException();
         }
         boolean removes = false;
         Iterator<?> iterator = c.iterator();
@@ -262,7 +295,6 @@ public class HashList<E> implements SortedCollection<E> {
                     if (removes != true) {
                         removes = true;
                     }
-                    break;
                 }
             }
         }
@@ -272,7 +304,7 @@ public class HashList<E> implements SortedCollection<E> {
     @Override
     public boolean retainAll(Collection<?> c) {
         if (size == 0) {
-            throw new NoSuchElementException();
+            throw new EmptyCollectionException();
         }
         boolean retains = false;
         boolean m = false;
@@ -286,12 +318,13 @@ public class HashList<E> implements SortedCollection<E> {
                     break;
                 }
             }
-            if (!m) {
+            if (m == false) {
                 innerIt.remove();
                 if (retains != true) {
                     retains = true;
                 }
             }
+            m = false;
         }
         return retains;
     }
@@ -302,83 +335,4 @@ public class HashList<E> implements SortedCollection<E> {
         tail = null;
         size = 0;
     }
-
-    @Override
-    public void sort() {
-        Object[] a = this.toArray();
-        Arrays.sort(a);
-        rearrangeNode(a);
-    }
-
-    @Override
-    public void sort(Comparator<? super E> c) {
-        Object[] a = this.toArray();
-        Arrays.sort(a, (Comparator) c);
-        rearrangeNode(a);
-    }
-
-    public static void main(String[] args) {
-
-        HashList<Integer> hashList = new HashList();
-        hashList.add(1);
-        hashList.add(4);
-        hashList.add(6);
-        hashList.add(2);
-        hashList.add(3);
-        hashList.add(10);
-        hashList.add(7);
-        hashList.add(5);
-        hashList.add(8);
-        hashList.add(9);
-
-        hashList.sort();
-        //hashList.remove(1);
-        //hashList.remove(9);
-        System.out.println(hashList.size());
-
-        System.out.println();
-
-        hashList.stream().forEach((Integer in) -> {
-            System.out.println(in);
-        });
-
-        System.out.println();
-
-        HashList<Integer> hashList0 = new HashList();
-
-        hashList0.add(4);
-        hashList0.add(1);
-        hashList0.add(9);
-        hashList0.add(8);
-        hashList0.add(10);
-        hashList0.add(3);
-        hashList0.add(2);
-        hashList0.add(6);
-        hashList0.add(5);
-        hashList0.add(7);
-
-        //hashList0.sort();
-        hashList0.stream().forEach((Integer in) -> {
-            System.out.println(in);
-        });
-
-        System.out.println();
-
-        System.out.println(hashList.removeAll(hashList0));
-        //System.out.println(hashList.retainAll(hashList0));
-
-        //System.out.println(hashList.containsAll(hashList0));
-        //System.out.println(hashList.addAll(hashList0));
-        System.out.println();
-
-        hashList.stream().forEach((Integer in) -> {
-            System.out.println(in);
-        });
-
-        System.out.println();
-
-        System.out.println(hashList.size);
-
-    }
-
 }
