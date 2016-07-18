@@ -19,7 +19,7 @@ public class TestUtil {
 
     public static void main(String[] args) {
 
-        HashList<Integer> hashList = new HashList();
+        SortableList<Integer> hashList = new SortableList();
         hashList.add(1);
         hashList.add(4);
         hashList.add(6);
@@ -64,7 +64,7 @@ public class TestUtil {
 
         System.out.println();
 
-        HashList<Integer> hashList0 = new HashList();
+        SortableList<Integer> hashList0 = new SortableList();
         hashList0.add(9);
         hashList0.add(8);
         
@@ -103,7 +103,7 @@ public class TestUtil {
         System.out.println();
         
         
-        Collection<Integer> arrayList = new ArrayHashList<>(2);
+        Collection<Integer> arrayList = new ArraySortableList<>(2);
         arrayList.add(9);
         arrayList.add(8);
         arrayList.add(5);
@@ -118,7 +118,7 @@ public class TestUtil {
         System.out.println(arrayList.size());
         System.out.println();
 
-        ((SortedCollection) arrayList).sort();
+        ((SortableCollection) arrayList).sort();
 
         Iterator<Integer> iterator = arrayList.iterator();
         while (iterator.hasNext()) {
@@ -165,7 +165,7 @@ public class TestUtil {
 
         System.out.println();
 
-        HashList<Integer> arrayList0 = new HashList();
+        SortableList<Integer> arrayList0 = new SortableList();
         arrayList0.add(1);
         arrayList0.add(4);
         arrayList0.add(6);
